@@ -2,3 +2,6 @@
 .venv/
 # Environment variables
 .env
+# Bases de datos locales
+*.duckdb
+localdata/
