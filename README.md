@@ -19,21 +19,6 @@ Todo el pipeline está impulsado por **DuckDB**, una base de datos SQL incrustad
 - **Frecuencia de Actualización:** Diaria (mes vigente) y archivos mensuales históricos (desde el 2025 por defecto).
 - **Formato de Datos:** Archivos ZIP con CSV separados por punto y coma.
 
-### Cobertura de Datos
-
-El pipeline procesa **8 archivos CSV** organizados como dimensiones y hechos de compras públicas:
-
-| Archivo | Tabla | Tipo | Descripción |
-|---------|-------|------|-------------|
-| InstitucionesRegistradas.csv | `dim_instituciones` | Dimensión | Instituciones públicas participantes en compras |
-| Proveedores.csv | `dim_proveedores` | Dimensión | Proveedores/vendedores registrados |
-| DetalleCarteles.csv | `fact_carteles` | Hecho | Anuncios de licititation (carteles) |
-| DetalleLineaCartel.csv | `fact_lineas_carteles` | Hecho | Líneas individuales por licitación |
-| Ofertas.csv | `fact_ofertas` | Hecho | Ofertas/propuestas de proveedores |
-| LineasOfertadas.csv | `fact_lineas_ofertas` | Hecho | Líneas en ofertas |
-| ProcedimientoAdjudicacion.csv | `fact_adjudicaciones` | Hecho | Decisiones de adjudicación |
-| LineasAdjudicadas.csv | `fact_lineas_adjudicadas` | Hecho | Líneas adjudicadas |
-
 ---
 ## Estructura del Proyecto
 
@@ -141,6 +126,21 @@ python etl/transforma.py
 # Transforma todos los meses en data/raw/
 python etl/transforma.py --backfill
 ```
+#### Cobertura de Datos
+
+El pipeline procesa **8 archivos CSV** organizados como dimensiones y hechos de compras públicas:
+
+| Archivo | Tabla | Tipo | Descripción |
+|---------|-------|------|-------------|
+| InstitucionesRegistradas.csv | `dim_instituciones` | Dimensión | Instituciones públicas participantes en compras |
+| Proveedores.csv | `dim_proveedores` | Dimensión | Proveedores/vendedores registrados |
+| DetalleCarteles.csv | `fact_carteles` | Hecho | Anuncios de licititation (carteles) |
+| DetalleLineaCartel.csv | `fact_lineas_carteles` | Hecho | Líneas individuales por licitación |
+| Ofertas.csv | `fact_ofertas` | Hecho | Ofertas/propuestas de proveedores |
+| LineasOfertadas.csv | `fact_lineas_ofertas` | Hecho | Líneas en ofertas |
+| ProcedimientoAdjudicacion.csv | `fact_adjudicaciones` | Hecho | Decisiones de adjudicación |
+| LineasAdjudicadas.csv | `fact_lineas_adjudicadas` | Hecho | Líneas adjudicadas |
+
 
 **Salida:** Archivos `data/staging/{yyyymm}/{tabla}.parquet`
 
