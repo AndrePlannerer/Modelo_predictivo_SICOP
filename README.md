@@ -232,6 +232,85 @@ python etl/construir_modelo_final.py
 
 ## Esquema de Base de Datos
 
+### Esquema Final (`final.*`)
+
+Tablas curadas, tipadas y desduplicas.
+
+```
+final.dim_instituciones
+├── cedula (VARCHAR)
+├── nombre_institucion (VARCHAR)
+├── zona_geo_inst (VARCHAR)
+└── fecha_ingreso (DATE)
+
+final.dim_proveedores
+├── cedula_proveedor (VARCHAR)
+├── nombre_proveedor (VARCHAR)
+├── tipo_proveedor (VARCHAR)
+├── tamano_proveedor (VARCHAR)
+├── zona_geo_prov (VARCHAR)
+└── fecha_registro (DATE)
+
+final.dim_productos
+├── cod_producto (BIGINT)
+├── descripcion_producto (VARCHAR)
+├── segmento (INTEGER, categoría UNSPSC)
+└── nombre_segmento (VARCHAR)
+
+final.fact_lineas_carteles
+├── nro_sicop (VARCHAR)
+├── numero_linea (VARCHAR)
+├── numero_partida (VARCHAR)
+├── cedula_institucion (VARCHAR)
+├── fecha_publicacion (DATE)
+├── nro_procedimiento (VARCHAR)
+├── tipo_procedimiento (VARCHAR)
+├── modalidad_procedimiento (VARCHAR)
+├── cartel_stat (VARCHAR)
+├── cartel_nm (VARCHAR)
+├── fecha_apertura (DATE)
+├── clasificacion_cartel (VARCHAR)
+├── monto_estimado_cartel (DOUBLE)
+├── cod_producto (VARCHAR)
+├── cantidad_solicitada (DOUBLE)
+├── precio_unitario_estimado (DOUBLE)
+├── tipo_moneda (VARCHAR)
+├── tipo_cambio_crc (DOUBLE)
+├── monto_linea (DOUBLE)
+├── desc_linea (VARCHAR)
+└── adjudicada (BOOLEAN)
+
+final.fact_lineas_ofertas
+├── nro_sicop (VARCHAR)
+├── nro_oferta (VARCHAR)
+├── nro_linea (VARCHAR)
+├── cedula_proveedor (VARCHAR)
+├── fecha_oferta (DATE)
+├── tipo_oferta (VARCHAR)
+├── cod_producto (VARCHAR)
+├── cantidad_ofertada (DOUBLE)
+├── precio_unitario_ofertado (DOUBLE)
+├── tipo_moneda (VARCHAR)
+├── tipo_cambio_crc (DOUBLE)
+└── monto_linea (DOUBLE)
+
+final.fact_lineas_adjudicadas
+├── nro_sicop (VARCHAR)
+├── nro_linea (VARCHAR)
+├── nro_oferta (VARCHAR)
+├── cedula_institucion (VARCHAR)
+├── numero_procedimiento (VARCHAR)
+├── descr_procedimiento (VARCHAR)
+├── fecha_adjudicacion (DATE)
+├── monto_adjudicado_linea (DOUBLE)
+├── cedula_proveedor (VARCHAR)
+├── cod_producto (VARCHAR)
+├── cantidad_adjudicada (DOUBLE)
+├── precio_unitario_adjudicado (DOUBLE)
+├── tipo_moneda (VARCHAR)
+└── tipo_cambio_crc (DOUBLE)
+```
+
 ### Esquema Staging (`staging.*`)
 
 Todas las columnas son VARCHAR (texto). Cada tabla incluye una columna `periodo` (formato YYYYMM).
@@ -320,85 +399,6 @@ staging.fact_lineas_adjudicadas
 ├── tipo_moneda
 ├── tipo_cambio_crc
 └── periodo
-```
-
-### Esquema Final (`final.*`)
-
-Tablas curadas, tipadas y desduplicas.
-
-```
-final.dim_instituciones
-├── cedula (VARCHAR)
-├── nombre_institucion (VARCHAR)
-├── zona_geo_inst (VARCHAR)
-└── fecha_ingreso (DATE)
-
-final.dim_proveedores
-├── cedula_proveedor (VARCHAR)
-├── nombre_proveedor (VARCHAR)
-├── tipo_proveedor (VARCHAR)
-├── tamano_proveedor (VARCHAR)
-├── zona_geo_prov (VARCHAR)
-└── fecha_registro (DATE)
-
-final.dim_productos
-├── cod_producto (BIGINT)
-├── descripcion_producto (VARCHAR)
-├── segmento (INTEGER, categoría UNSPSC)
-└── nombre_segmento (VARCHAR)
-
-final.fact_lineas_carteles
-├── nro_sicop (VARCHAR)
-├── numero_linea (VARCHAR)
-├── numero_partida (VARCHAR)
-├── cedula_institucion (VARCHAR)
-├── fecha_publicacion (DATE)
-├── nro_procedimiento (VARCHAR)
-├── tipo_procedimiento (VARCHAR)
-├── modalidad_procedimiento (VARCHAR)
-├── cartel_stat (VARCHAR)
-├── cartel_nm (VARCHAR)
-├── fecha_apertura (DATE)
-├── clasificacion_cartel (VARCHAR)
-├── monto_estimado_cartel (DOUBLE)
-├── cod_producto (VARCHAR)
-├── cantidad_solicitada (DOUBLE)
-├── precio_unitario_estimado (DOUBLE)
-├── tipo_moneda (VARCHAR)
-├── tipo_cambio_crc (DOUBLE)
-├── monto_linea (DOUBLE)
-├── desc_linea (VARCHAR)
-└── adjudicada (BOOLEAN)
-
-final.fact_lineas_ofertas
-├── nro_sicop (VARCHAR)
-├── nro_oferta (VARCHAR)
-├── nro_linea (VARCHAR)
-├── cedula_proveedor (VARCHAR)
-├── fecha_oferta (DATE)
-├── tipo_oferta (VARCHAR)
-├── cod_producto (VARCHAR)
-├── cantidad_ofertada (DOUBLE)
-├── precio_unitario_ofertado (DOUBLE)
-├── tipo_moneda (VARCHAR)
-├── tipo_cambio_crc (DOUBLE)
-└── monto_linea (DOUBLE)
-
-final.fact_lineas_adjudicadas
-├── nro_sicop (VARCHAR)
-├── nro_linea (VARCHAR)
-├── nro_oferta (VARCHAR)
-├── cedula_institucion (VARCHAR)
-├── numero_procedimiento (VARCHAR)
-├── descr_procedimiento (VARCHAR)
-├── fecha_adjudicacion (DATE)
-├── monto_adjudicado_linea (DOUBLE)
-├── cedula_proveedor (VARCHAR)
-├── cod_producto (VARCHAR)
-├── cantidad_adjudicada (DOUBLE)
-├── precio_unitario_adjudicado (DOUBLE)
-├── tipo_moneda (VARCHAR)
-└── tipo_cambio_crc (DOUBLE)
 ```
 
 ---
@@ -571,7 +571,7 @@ con.close()
 - Aumenta threads de DuckDB: `SET threads = 4;`
 
 ---
-
+<!-- This content will not appear in the rendered Markdown
 ## Licencia
 
 [Agrega tu licencia aquí, p. ej., MIT, Apache 2.0, etc.]
@@ -583,3 +583,4 @@ con.close()
 ## Contacto
 
 [Agrega información de autor/contacto aquí]
+ -->
