@@ -38,34 +38,76 @@ El pipeline procesa **8 archivos CSV** organizados como dimensiones y hechos de 
 | LineasAdjudicadas.csv | `fact_lineas_adjudicadas` | Hecho | Líneas adjudicadas |
 
 ---
-
-## Arquitectura del Pipeline ETL
-
-El pipeline sigue un patrón **de almacén de datos de 3 capas**:
+## Estructura del Proyecto
 
 ```
-Datos Sin Procesar (ZIP → CSV)
-        ↓
-    Descarga
-        ↓
-    Capa Raw (data/raw/{yyyymm}/*.csv)
-        ↓
-    Transforma
-        ↓
-Capa Staging (data/staging/{yyyymm}/*.parquet)
-        ↓
-    Carga Staging
-        ↓
-Esquema Staging (staging.*)
-        ↓
-    Construir Modelo Final
-        ↓
-Esquema Final (final.*)
-        ↓
-    Entrena y Predice
-        ↓
-    Salida del Modelo ML
+Modelo_predictivo_SICOP/
+├── etl/
+│   ├── descarga.py                    # Descarga desde API de SICOP
+│   ├── transforma.py                  # Normaliza CSV → Parquet
+│   ├── carga_staging.py               # Carga Parquet → staging de DuckDB
+│   ├── construir_modelo_final.py      # Transforma staging → esquema final
+│   ├── esquema_staging.sql            # DDL para tablas de staging
+│   └── csv_config.py                  # Mapeos de columnas por CSV
+├── modelo/
+│   └── entrena_y_predice.py           # Entrenamiento de modelo ML y predicción
+├── data/
+│   ├── raw/                           # CSVs descargados (por mes)
+│   ├── staging/                       # Archivos Parquet (por mes)
+│   └── sicop.duckdb                   # Base de datos DuckDB
+├── requirements.txt                   # Dependencias de Python
+├── .gitignore                         # Ignora *.duckdb, .venv, etc.
+└── README.md                          # Este archivo
 ```
+
+---
+
+## Diagrama de Arquitectura
+
+```
+┌─────────────────────────────────────┐
+│   API Pública de SICOP (ZIP Mensual)│
+│  Azure Blob Storage (YYYYMM.zip)    │
+└──────────────┬──────────────────────┘
+               │ descarga.py
+               ▼
+┌─────────────────────────────────────┐
+│  Capa Raw (data/raw/YYYYMM)         │
+│  8 archivos CSV                     │
+└──────────────┬──────────────────────┘
+               │ transforma.py
+               │ (Normaliza columnas)
+               ▼
+┌─────────────────────────────────────┐
+│ Datos Staging (data/staging/YYYYMM) │
+│ 8 archivos Parquet (todo VARCHAR)   │
+└──────────────┬──────────────────────┘
+               │ carga_staging.py
+               ▼
+┌─────────────────────────────────────┐
+│   Esquema Staging de DuckDB         │
+│  (staging.dim_*, staging.fact_*)    │
+│   Todas las columnas: VARCHAR       │
+└──────────────┬──────────────────────┘
+               │ construir_modelo_final.py
+               │ (Tipado, deduplicación, join)
+               ▼
+┌─────────────────────────────────────┐
+│   Esquema Final de DuckDB           │
+│  (final.dim_*, final.fact_*)        │
+│   Tipado, desduplicado, listo para ML
+└──────────────┬──────────────────────┘
+               │ entrena_y_predice.py
+               ▼
+┌─────────────────────────────────────┐
+│  Modelo ML y Predicciones           │
+│  (clasificador scikit-learn)        │
+└─────────────────────────────────────┘
+```
+
+---
+
+## Pipeline ETL
 
 ### Fase 1: Extracción (`descarga.py`)
 
@@ -527,75 +569,6 @@ con.close()
 - Filtra por rango de fechas en consultas
 - Usa tablas de staging directamente si necesitas datos sin procesar (sin tipos, más rápido)
 - Aumenta threads de DuckDB: `SET threads = 4;`
-
----
-
-## Estructura del Proyecto
-
-```
-Modelo_predictivo_SICOP/
-├── etl/
-│   ├── descarga.py                    # Descarga desde API de SICOP
-│   ├── transforma.py                  # Normaliza CSV → Parquet
-│   ├── carga_staging.py               # Carga Parquet → staging de DuckDB
-│   ├── construir_modelo_final.py      # Transforma staging → esquema final
-│   ├── esquema_staging.sql            # DDL para tablas de staging
-│   └── csv_config.py                  # Mapeos de columnas por CSV
-├── modelo/
-│   └── entrena_y_predice.py           # Entrenamiento de modelo ML y predicción
-├── data/
-│   ├── raw/                           # CSVs descargados (por mes)
-│   ├── staging/                       # Archivos Parquet (por mes)
-│   └── sicop.duckdb                   # Base de datos DuckDB
-├── requirements.txt                   # Dependencias de Python
-├── .gitignore                         # Ignora *.duckdb, .venv, etc.
-└── README.md                          # Este archivo
-```
-
----
-
-## Diagrama de Arquitectura
-
-```
-┌─────────────────────────────────────┐
-│   API Pública de SICOP (ZIP Mensual)│
-│  Azure Blob Storage (YYYYMM.zip)    │
-└──────────────┬──────────────────────┘
-               │ descarga.py
-               ▼
-┌─────────────────────────────────────┐
-│  Capa Raw (data/raw/YYYYMM)         │
-│  8 archivos CSV                     │
-└──────────────┬──────────────────────┘
-               │ transforma.py
-               │ (Normaliza columnas)
-               ▼
-┌─────────────────────────────────────┐
-│ Datos Staging (data/staging/YYYYMM) │
-│ 8 archivos Parquet (todo VARCHAR)   │
-└──────────────┬──────────────────────┘
-               │ carga_staging.py
-               ▼
-┌─────────────────────────────────────┐
-│   Esquema Staging de DuckDB         │
-│  (staging.dim_*, staging.fact_*)    │
-│   Todas las columnas: VARCHAR       │
-└──────────────┬──────────────────────┘
-               │ construir_modelo_final.py
-               │ (Tipado, deduplicación, join)
-               ▼
-┌─────────────────────────────────────┐
-│   Esquema Final de DuckDB           │
-│  (final.dim_*, final.fact_*)        │
-│   Tipado, desduplicado, listo para ML
-└──────────────┬──────────────────────┘
-               │ entrena_y_predice.py
-               ▼
-┌─────────────────────────────────────┐
-│  Modelo ML y Predicciones           │
-│  (clasificador scikit-learn)        │
-└─────────────────────────────────────┘
-```
 
 ---
 
