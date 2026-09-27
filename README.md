@@ -1,14 +1,11 @@
 # Modelo Predictivo SICOP
 
-Un pipeline de aprendizaje automático para predecir resultados de compras públicas utilizando datos del **Sistema de Información de Compras y Contrataciones Públicas (SICOP)** — el Observatorio de Compra Pública de Costa Rica.
-
 ## Descripción General
-
-Este proyecto implementa un pipeline completo de ETL (Extracción, Transformación, Carga) que:
-1. **Descarga** datos mensuales de compras públicas desde la API de SICOP
-2. **Transforma** archivos CSV sin procesar en una capa de staging estructurada
-3. **Cura** datos en un esquema analítico listo para producción
-4. **Entrena** un modelo de aprendizaje automático para predecir resultados de compras
+Este proyecto implementa un pipeline completo de ETL (Extracción, Transformación, Carga). Para esto se utilizan GitHub Actions para crear la base de datos y para actualizar los datos diariamente. Las tareas automatizadas se encargan de:
+1. **Descargar** datos mensuales de compras públicas desde la API del Observatorio de Compra Pública de Costa Rica con datos provenientes del Sistema Integrado de Compras Públicas (SICOP).
+2. **Transformar** archivos CSV sin procesar en una capa de staging estructurada.
+3. **Construir** , y publicar en un release, un esquema de base de datos analítico listo para producción.
+4. **Entrenar** un modelo de aprendizaje automático para predecir diariamente resultados de compras.
 
 Todo el pipeline está impulsado por **DuckDB**, una base de datos SQL incrustada optimizada para cargas de trabajo analíticas.
 
@@ -16,11 +13,11 @@ Todo el pipeline está impulsado por **DuckDB**, una base de datos SQL incrustad
 
 ## Fuente de Datos
 
-**SICOP (Sistema de Información de Compras y Contrataciones Públicas)**
-- **Proveedor:** Observatorio de Compra Pública de Costa Rica
+**SICOP (Sistema Integrado de Compras Públicas)**
+- **Proveedor de datos:** [Observatorio de Compra Pública de Costa Rica](https://www.observatoriocomprapublica.go.cr/).
 - **Acceso:** https://dlsaobservatorioprod.blob.core.windows.net/fs-synapse-observatorio-produccion/Zip/{yyyymm}.zip
-- **Frecuencia de Actualización:** Diaria (mes vigente) y archivos mensuales históricos
-- **Formato de Datos:** Archivos ZIP con CSV separados por punto y coma
+- **Frecuencia de Actualización:** Diaria (mes vigente) y archivos mensuales históricos (desde el 2025 por defecto).
+- **Formato de Datos:** Archivos ZIP con CSV separados por punto y coma.
 
 ### Cobertura de Datos
 
