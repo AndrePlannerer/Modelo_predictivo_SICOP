@@ -256,7 +256,7 @@ def construir(con) -> None:
             TRY_CAST(lo.tipo_cambio_crc AS DOUBLE) AS tipo_cambio_crc,
             (TRY_CAST(lo.cantidad_ofertada AS DOUBLE) * TRY_CAST(lo.precio_unitario_ofertado AS DOUBLE))
                 * CASE WHEN lo.tipo_moneda = 'CRC' THEN 1
-                       ELSE TRY_CAST(lo.tipo_cambio_crc AS DOUBLE) END AS monto_linea_crc
+                       ELSE TRY_CAST(lo.tipo_cambio_crc AS DOUBLE) END AS monto_oferta_linea_crc
         FROM staging.fact_ofertas o
         JOIN staging.fact_lineas_ofertas lo USING (nro_oferta)
         QUALIFY ROW_NUMBER() OVER (
@@ -275,9 +275,9 @@ def construir(con) -> None:
             a.descr_procedimiento,
             fecha_flexible(a.fecha_adjud_firme) AS fecha_adjudicacion,
             TRY_CAST(a.monto_adju_linea AS DOUBLE) AS monto_adjudicado_linea,
-            (TRY_CAST(a.monto_adju_linea AS DOUBLE) 
-                * CASE WHEN a.tipo_moneda = 'CRC' THEN 1 
-                    ELSE TRY_CAST(a.tipo_cambio_crc AS DOUBLE) END) AS monto_adjudicado_linea_crc,
+            (TRY_CAST(la.precio_unitario_adjudicado AS DOUBLE) * TRY_CAST(la.cantidad_adjudicada AS DOUBLE)
+                * CASE WHEN la.tipo_moneda = 'CRC' THEN 1 
+                    ELSE TRY_CAST(la.tipo_cambio_crc AS DOUBLE) END) AS monto_adjudicado_linea_crc,
             la.cedula_proveedor,
             la.codigo_producto AS cod_producto,
             TRY_CAST(la.cantidad_adjudicada AS DOUBLE) AS cantidad_adjudicada,
