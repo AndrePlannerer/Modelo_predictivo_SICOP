@@ -31,7 +31,7 @@ RUTA_DUCKDB = "data/sicop.duckdb"
 RUTA_MODELO = "modelo/clasificador_adjudicacion.joblib"
 
 COLUMNAS_CATEGORICAS = ["cod_producto", "tipo_moneda", "tipo_oferta"]
-COLUMNAS_NUMERICAS = ["cantidad_ofertada", "precio_unitario_ofertado", "tipo_cambio_crc", "monto_linea"]
+COLUMNAS_NUMERICAS = ["cantidad_ofertada", "precio_unitario_ofertado", "monto_oferta_linea_crc"]
 
 CONSULTA_ENTRENAMIENTO = """
     SELECT
