@@ -2,7 +2,7 @@
 dashboard y el modelo de ML -- a partir del esquema `staging`.
 
 Se reconstruye completo desde cero en cada corrida (CREATE OR REPLACE),
-leyendo TODO el staging acumulado (no solo el mes vigente). Con el volumen
+leyendo todo el staging acumulado (no solo el mes vigente). Con el volumen
 de datos de este proyecto, DuckDB hace esto en segundos, así que es más
 simple que mantener un "final" incremental.
 
@@ -223,7 +223,11 @@ def construir(con) -> None:
             TRY_CAST(l.precio_unitario_estimado AS DOUBLE) AS precio_unitario_estimado,
             l.tipo_moneda,
             TRY_CAST(l.tipo_cambio_crc AS DOUBLE) AS tipo_cambio_crc,
-            TRY_CAST(l.monto_reservado AS DOUBLE) AS monto_linea,
+            -- monto_linea siempre en colones: si ya es CRC no se convierte (factor 1)
+            -- , si no, se multiplica por el tipo de cambio.
+            TRY_CAST(l.monto_reservado AS DOUBLE)
+                * CASE WHEN l.tipo_moneda = 'CRC' THEN 1
+                       ELSE TRY_CAST(l.tipo_cambio_crc AS DOUBLE) END AS monto_linea_crc,
             l.desc_linea,
             EXISTS (
                 SELECT 1 FROM staging.fact_lineas_adjudicadas a
@@ -250,8 +254,9 @@ def construir(con) -> None:
             TRY_CAST(lo.precio_unitario_ofertado AS DOUBLE) AS precio_unitario_ofertado,
             lo.tipo_moneda,
             TRY_CAST(lo.tipo_cambio_crc AS DOUBLE) AS tipo_cambio_crc,
-            TRY_CAST(lo.cantidad_ofertada AS DOUBLE)
-                * TRY_CAST(lo.precio_unitario_ofertado AS DOUBLE) AS monto_linea
+            (TRY_CAST(lo.cantidad_ofertada AS DOUBLE) * TRY_CAST(lo.precio_unitario_ofertado AS DOUBLE))
+                * CASE WHEN lo.tipo_moneda = 'CRC' THEN 1
+                       ELSE TRY_CAST(lo.tipo_cambio_crc AS DOUBLE) END AS monto_linea_crc
         FROM staging.fact_ofertas o
         JOIN staging.fact_lineas_ofertas lo USING (nro_oferta)
         QUALIFY ROW_NUMBER() OVER (
@@ -270,6 +275,9 @@ def construir(con) -> None:
             a.descr_procedimiento,
             fecha_flexible(a.fecha_adjud_firme) AS fecha_adjudicacion,
             TRY_CAST(a.monto_adju_linea AS DOUBLE) AS monto_adjudicado_linea,
+            (TRY_CAST(a.monto_adju_linea AS DOUBLE) 
+                * CASE WHEN a.tipo_moneda = 'CRC' THEN 1 
+                    ELSE TRY_CAST(a.tipo_cambio_crc AS DOUBLE) END) AS monto_adjudicado_linea_crc,
             la.cedula_proveedor,
             la.codigo_producto AS cod_producto,
             TRY_CAST(la.cantidad_adjudicada AS DOUBLE) AS cantidad_adjudicada,

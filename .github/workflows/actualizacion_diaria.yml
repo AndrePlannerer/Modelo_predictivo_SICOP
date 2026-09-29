@@ -2,7 +2,7 @@ name: Actualización diaria SICOP
 
 on:
   schedule:
-    - cron: "30 10 * * *"  # 08:30 hora de Costa Rica (UTC-6); el Observatorio publica a las 08:00
+    - cron: "30 10 * * *"  # Corre aproximadamente a las 08:30 am hora de Costa Rica (UTC-6); el Observatorio publica a las 08:00am.
   workflow_dispatch:
     inputs:
       forzar_reentrenamiento:
